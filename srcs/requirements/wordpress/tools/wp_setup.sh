@@ -53,3 +53,5 @@ wp --allow-root user create \
 
 wp --allow-root plugin update --all
 
+exec "$@"
+

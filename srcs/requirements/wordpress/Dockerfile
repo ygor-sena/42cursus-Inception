@@ -1,11 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM debian:oldstable
 
-ARG SQL_DATABASE
-ARG SQL_USER
-ARG SQL_PASSWORD
-ARG DOMAIN_NAME
-
 WORKDIR /var/www/html/
 
 RUN apt-get update && apt-get upgrade -y
@@ -13,12 +8,9 @@ RUN apt-get update && apt-get upgrade -y
 # Install necessary packages to run wordpress and mariadb client
 RUN apt-get install -y \
 	wget \
-	php7.4-fpm \
-	php7.4-mysql \
+	php-fpm \
+	php-mysql \
 	mariadb-client
-
-# BONUS: install redis cache
-RUN apt-get install php7.4-redis redis-tools -y
 
 # [Configure PHP to NGINX communication]
 # Backup the default conf file
@@ -27,7 +19,6 @@ RUN apt-get install php7.4-redis redis-tools -y
 #COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/
 # Create a symbolic link to the php-fpm binary to make it easier
 # to run from anywhere in the container
-#RUN ln -s $(find /usr/sbin -name 'php-fpm*') /usr/bin/php-fpm
 
 RUN sed -i.default "/^listen\s=.*/c\listen = 0.0.0.0:9000" \
 	/etc/php/[0-9]*.[0-9]*/fpm/pool.d/www.conf
@@ -38,6 +29,7 @@ RUN sed -i.default "/^listen\s=.*/c\listen = 0.0.0.0:9000" \
 RUN mkdir -p /run/php
 RUN chmod 755 /run/php
 
+RUN ln -s $( find /usr/sbin -name 'php-fpm*') /usr/bin/php-fpm
 # chown -R www-data:www-data /var/www/html/
 
 # Install wp-cli to manage WordPress from CLI to user's bin directory
@@ -52,7 +44,7 @@ RUN chmod 755 /usr/local/bin/wp_setup.sh
 COPY        ./tools/run_php_fpm.sh /usr/local/bin/
 #RUN         chmod 755 /usr/local/bin/run_php_fpm.sh
 
-RUN ln -s $(find /usr/sbin -name 'php-fpm*') /usr/bin/php-fpm
+#RUN ln -s $(find /usr/sbin -name 'php-fpm*') /usr/bin/php-fpm
 
 #ENTRYPOINT  [ "bash", "/usr/local/bin/wp_setup.sh" ]
 

@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM debian:oldstable
 
-ARG DOMAIN_NAME
 ARG NGINX_CERT_PATH
+ARG DOMAIN_NAME
 
 # Update and upgrade the system
 RUN apt-get update && apt-get upgrade -y
