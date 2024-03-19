@@ -1,57 +1,35 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-#export SQL_DATABASE="wordpress"
-#export SQL_USER="root"
-#export SQL_PASSWORD="wordpress"
+chown -R www-data:www-data /var/www/html/
 
-# [WORDPRESS INSTALATION]
-# Download and extract the latest version of WordPress
-#wget https://wordpress.org/latest.tar.gz
-#tar -xvf latest.tar.gz
+sudo -u www-data sh -c "wp core download"
 
-# Move the WordPress files to the root of the web server
-#mkdir -p /var/www/html/
-#mv wordpress/* /var/www/html/
-#rm -rf latest.tar.gz
-
-# Set the correct permissions with standard web server user www-data
-# chown -R www-data:www-data /var/www/html/
-
-# Install wp-cli to manage WordPress from CLI to user's bin directory
-# wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -O /usr/local/bin/wp
-# chmod +x /usr/local/bin/wp
-
-# [WORDPRESS CONFIGURATION]
-# mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
-#wp config set DB_NAME $SQL_DATABASE --allow-root --path=/var/www/html/
-#wp config set DB_USER $SQL_USER --allow-root --path=/var/www/html/
-#wp config set DB_PASSWORD $SQL_PASSWORD --allow-root --path=/var/www/html/
-#wp config set DB_HOST mariadb --allow-root --path=/var/www/html/
-wp --allow-root core download
-
-wp --allow-root config create \
-	--dbname="$SQL_DATABASE" \
-	--dbuser="$SQL_USER" \
-	--dbpass="$SQL_PASSWORD" \
+sudo -u www-data sh -c "wp config create \
+	--dbname=$WP_DB_NAME \
+	--dbuser=$WP_DB_USER \
+	--dbpass=$WP_DB_PASSWORD \
 	--dbhost=mariadb \
-	--dbcharset='utf8'
+	--dbcharset='utf8'"
 
-wp --allow-root core install \
-	--url="$DOMAIN_NAME" \
-	--title="Inception" \
-	--admin_user=admin \
-	--admin_password=admin \
-	--admin_password=adminpwd \
-	--admin_email=admin@email \
-	--skip-email
+sudo -u www-data sh -c "wp core install \
+	--url=$DOMAIN_NAME \
+	--title=Inception \
+	--admin_user=$WP_DB_USER \
+	--admin_password=$WP_DB_PASSWORD \
+	--admin_email=$WP_DB_EMAIL \
+	--skip-email"
 
-wp --allow-root user create \
-	guestwpuser \
-	guestwpuser@gmail.com \
+sudo -u www-data sh -c "wp user create \
+	$WP_GUEST_USER \
+	$WP_GUEST_EMAIL \
 	--role=author \
-	--user_pass=wp_user
+	--user_pass=$WP_GUEST_PASSWORD"
 
-wp --allow-root plugin update --all
+sudo -u www-data sh -c "wp theme activate twentytwentythree"
 
+sudo -u www-data sh -c "wp plugin update --all"
+
+# On the same terminal, it executes this sh and also the cmds passed as argument
+# by the user. It also replaces the current process with the one passed as argument
+# https://stackoverflow.com/questions/39082768/what-does-set-e-and-exec-do-for-docker-entrypoint-scripts
 exec "$@"
-
