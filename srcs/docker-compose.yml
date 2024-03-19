@@ -4,16 +4,17 @@ services:
   nginx:
     image: nginx:42
     container_name: nginx
+    init: true
     build:
       context: requirements/nginx
       dockerfile: Dockerfile
       args:
         - DOMAIN_NAME
         - NGINX_CERT_PATH
-    networks:
-      - inception
     ports:
       - 443:443
+    networks:
+      - inception
     volumes:
       - wordpress:/var/www/html
     depends_on:
@@ -23,6 +24,7 @@ services:
   mariadb:
     image: mariadb:42
     container_name: mariadb
+    init: true
     build:
       context: requirements/mariadb
       dockerfile: Dockerfile
@@ -41,6 +43,7 @@ services:
   wordpress:
     image: wordpress:42
     container_name: wordpress
+    init: true
     build:
       context: requirements/wordpress
       dockerfile: Dockerfile
@@ -61,6 +64,7 @@ services:
       - wordpress:/var/www/html
     depends_on:
       - mariadb
+    restart: always
 
 volumes:
   mariadb:
