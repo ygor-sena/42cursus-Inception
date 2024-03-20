@@ -1,6 +1,24 @@
 version: "3.8"
 
+volumes:
+  mariadb:
+    driver_opts:
+      type: none
+      device: /home/${LOGIN}/data/mariadb
+      o: bind
+  wordpress:
+    driver_opts:
+      type: none
+      device: /home/${LOGIN}/data/wordpress
+      o: bind
+
+networks:
+  inception:
+    name: inception
+    driver: bridge
+
 services:
+# Mandatory services
   nginx:
     image: nginx:42
     container_name: nginx
@@ -66,19 +84,55 @@ services:
       - mariadb
     restart: always
 
-volumes:
-  mariadb:
-    driver_opts:
-      type: none
-      device: /home/${LOGIN}/data/mariadb
-      o: bind
-  wordpress:
-    driver_opts:
-      type: none
-      device: /home/${LOGIN}/data/wordpress
-      o: bind
+# Bonus services
+  adminer:
+    container_name: adminer
+    image: adminer:42
+    init: true
+    build:
+      context: requirements/bonus/adminer
+      dockerfile: Dockerfile
+    networks:
+      - inception
+    volumes:
+      - wordpress:/var/www/html
+    restart: always
+    depends_on:
+      - wordpress
+      
+  cadvisor:
+    container_name: cadvisor
+    image: cadvisor:42
+    init: true
+    build:
+      context: requirements/bonus/cadvisor
+      dockerfile: Dockerfile
+    networks:
+      - inception
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    privileged: true
+    devices:
+      - dev/kmsg
+    restart: always
+    depends_on:
+      - wordpress
 
-networks:
-  inception:
-    name: inception
-    driver: bridge
+  redis:
+    container_name: redis
+    image: redis:42
+    init: true
+    build:
+      context: requirements/bonus/redis-cache
+      dockerfile: Dockerfile
+    privileged: true
+    networks:
+      - inception
+    ports:
+      - 6379
+    restart: always

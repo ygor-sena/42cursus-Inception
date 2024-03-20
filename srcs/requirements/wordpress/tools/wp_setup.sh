@@ -26,8 +26,13 @@ sudo -u www-data sh -c "wp user create \
 	--user_pass=$WP_GUEST_PASSWORD"
 
 sudo -u www-data sh -c "wp theme activate twentytwentythree"
-
 sudo -u www-data sh -c "wp plugin update --all"
+
+sudo -u www-data sh -c "wp plugin install redis-cache --activate"
+sudo -u www-data sh -c "wp config set WP_REDIS_HOST 'redis'"
+sudo -u www-data sh -c "wp config set WP_REDIS_PORT 6379"
+sudo -u www-data sh -c "wp config set WP_CACHE true"
+sudo -u www-data sh -c "wp redis enable"
 
 # On the same terminal, it executes this sh and also the cmds passed as argument
 # by the user. It also replaces the current process with the one passed as argument

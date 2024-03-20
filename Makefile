@@ -2,6 +2,10 @@ LOGIN=yde-goes
 DOCKER_COMPOSE = docker-compose -f srcs/docker-compose.yml
 VOLUMES = "/home/$(LOGIN)/data"
 
+
+set_host:
+	sudo grep -q $(LOGIN) /etc/hosts || sudo sed -i "3i127.0.0.1\t$(LOGIN).42.fr" /etc/hosts
+
 up:
 	sudo mkdir -p "$(VOLUMES)/wordpress" "$(VOLUMES)/mariadb"
 	$(DOCKER_COMPOSE) up -d --build
