@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 
+# This script sets up a WordPress installation by performing the following steps:
+# 1. Changes the ownership of the /var/www/html/ directory to www-data user and group.
+# 2. Downloads the WordPress core files using the `wp core download` command.
+# 3. Creates a wp-config.php file with the specified database credentials using the `wp config create` command.
+# 4. Installs WordPress using the `wp core install` command with the specified site details.
+# 5. Creates a new user with the specified username, email, and password using the `wp user create` command.
+# 6. Activates the twentytwentythree theme using the `wp theme activate` command.
+# 7. Updates all installed plugins using the `wp plugin update --all` command.
+# 8. Installs and activates the Redis Cache plugin using the `wp plugin install redis-cache --activate` command.
+# 9. Sets the WP_REDIS_HOST and WP_REDIS_PORT constants in the wp-config.php file.
+# 10. Enables Redis object caching using the `wp redis enable` command.
+
+# Note: This script assumes that the necessary environment variables (WP_DB_NAME, WP_DB_USER, WP_DB_PASSWORD,
+# DOMAIN_NAME, WP_DB_EMAIL, WP_GUEST_USER, WP_GUEST_EMAIL, WP_GUEST_PASSWORD) are set before running the script.
+
 chown -R www-data:www-data /var/www/html/
 
 sudo -u www-data sh -c "wp core download"

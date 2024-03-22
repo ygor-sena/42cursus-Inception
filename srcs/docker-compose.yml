@@ -136,3 +136,38 @@ services:
     ports:
       - 6379
     restart: always
+
+  static:
+    container_name: static
+    image: static:42
+    init: true
+    build:
+      context: requirements/bonus/static-website
+      dockerfile: Dockerfile
+    networks:
+      - inception
+    expose:
+      - 3000
+    restart: always
+
+  ftp:
+    container_name: ftp
+    image: ftp:42
+    init: true
+    build:
+      context: requirements/bonus/ftp-server
+      dockerfile: Dockerfile
+    environment:
+      - FTP_USER
+      - FTP_PASSWORD
+    networks:
+      - inception
+    ports:
+      - 20:20
+      - 21:21
+      - 21000-21010:21000-21010
+    volumes:
+      - wordpress:/home/${FTP_USER}/ftp
+    restart: always
+    depends_on:
+      - wordpress
